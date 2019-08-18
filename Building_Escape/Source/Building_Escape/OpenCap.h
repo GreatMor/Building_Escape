@@ -5,39 +5,32 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "OpenDoot.generated.h"
+#include "OpenCap.generated.h"
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class BUILDING_ESCAPE_API UOpenDoot : public UActorComponent
+class BUILDING_ESCAPE_API UOpenCap : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UOpenDoot();
+	UOpenCap();
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	void OpenDoor();
-	
+	void OpenCap();
 
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-
-	
-	UPROPERTY(VisibleAnywhere)
-	float OpenAngl = 90.f;
-
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume * PressurePlate;
 
 	//UPROPERTY(EditAnywhere)
 	AActor * ActorThatOpens; //эктор который открывает 
-		
 };
