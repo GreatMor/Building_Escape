@@ -4,6 +4,7 @@
 #include "Grabber.h"
 #include "Engine/World.h"
 #include "Runtime/Engine/Classes/GameFramework/Controller.h"
+#include "Engine/Public/DrawDebugHelpers.h"
 
 #define OUT
 
@@ -42,8 +43,22 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 		OUT PlayerViwePointLocation,
 		OUT PlayerViwePointRotation);	
 
-	UE_LOG(LogTemp, Warning, TEXT("location: %s, rotation: %s"), 
+	FVector LintraceEnd = PlayerViwePointLocation + PlayerViwePointRotation.Vector() * Reach;
+
+	/*UE_LOG(LogTemp, Warning, TEXT("location: %s, rotation: %s"), 
 		*PlayerViwePointLocation.ToString(), 
-		*PlayerViwePointRotation.ToString());
+		*PlayerViwePointRotation.ToString());*/
+
+	DrawDebugLine
+	(
+		GetWorld(),
+		PlayerViwePointLocation,
+		LintraceEnd,
+		FColor(255, 0, 0),
+		false,
+		0.f,
+		0.f,
+		5.f
+	);
 }
 
