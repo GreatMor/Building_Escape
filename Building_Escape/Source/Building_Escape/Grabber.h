@@ -20,7 +20,7 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	float Reach = 20.f;
+	float Reach = 50.f;
 
 public:	
 	// Called every frame
