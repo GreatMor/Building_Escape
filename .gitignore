@@ -6,6 +6,9 @@
 */DerivedDataCache/
 */Binaries/
 */Saved/
+*/Content/StarterContent/
+*/Content/MedievalDungeon/
+
 Building_Escape/Content/StarterContent/
 
 
@@ -16,3 +19,4 @@ Building_Escape/Content/StarterContent/
 *VC.db
 
 Building_Escape/.vs/
+
