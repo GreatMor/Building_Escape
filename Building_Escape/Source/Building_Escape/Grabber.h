@@ -2,8 +2,11 @@
 
 #pragma once
 
+
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "Engine/Classes/Components/InputComponent.h"
 #include "Grabber.generated.h"
 
 
@@ -20,7 +23,14 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+private:
 	float Reach = 50.f;
+
+	UPhysicsHandleComponent * PhysicsHandel = nullptr;
+	UInputComponent *InputComponent = nullptr;
+
+	///ѕосылает луч и хватает то до чего достал 
+	void Grab();
 
 public:	
 	// Called every frame

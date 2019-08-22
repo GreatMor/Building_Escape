@@ -24,10 +24,34 @@ void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+	PhysicsHandel = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (PhysicsHandel)
+	{
+
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s no component "), *GetOwner()->GetName());
+	}
+
+	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+	if (InputComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s Inputcomponent "), *GetOwner()->GetName());
+		///привязываем действие 
+		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s no Inputcomponent "), *GetOwner()->GetName());
+	}
 }
 
+
+void UGrabber::Grab()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Grab"));
+}
 
 // Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -77,6 +101,9 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Actor hit : %s "), *(ActorHit->GetName()));
 	}
+
+		
+		 
 	
 }
 
