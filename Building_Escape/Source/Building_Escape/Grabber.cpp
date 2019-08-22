@@ -4,6 +4,7 @@
 #include "Grabber.h"
 #include "Engine/World.h"
 #include "Runtime/Engine/Classes/GameFramework/Controller.h"
+#include "Engine/Classes/PhysicsEngine/PhysicsHandleComponent.h"
 #include "Engine/Public/DrawDebugHelpers.h"
 
 #define OUT
@@ -11,35 +12,29 @@
 // Sets default values for this component's properties
 UGrabber::UGrabber()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
-
 
 // Called when the game starts
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 
-	PhysicsHandel = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandel)
-	{
+	 FindPhysicsHandleComponent();
 
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s no component "), *GetOwner()->GetName());
-	}
+	 SetupInputComponent();
+	
+}
 
+void UGrabber::SetupInputComponent()
+{
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (InputComponent)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s Inputcomponent "), *GetOwner()->GetName());
 		///привязываем действие 
 		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
 	}
 	else
 	{
@@ -47,44 +42,75 @@ void UGrabber::BeginPlay()
 	}
 }
 
+void UGrabber::FindPhysicsHandleComponent()
+{
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (!PhysicsHandle) { return; }
+	if (PhysicsHandle)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("FindPhysicsComponent = true"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s no component "), *GetOwner()->GetName());
+	}
+}
 
 void UGrabber::Grab()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Grab"));
-}
+	UE_LOG(LogTemp, Warning, TEXT("Grab"));	
+	//Выпускаем луч и проверяем дотянулись до актора с установленым параметром фзического тела 	
+	auto HitResult = GetFirstPhysicsBodyInReach();
+	//Получает компонете до которого дотронулся актор
+	UPrimitiveComponent* ComponentToGrab = HitResult.GetComponent();
 
-// Called every frame
+	auto ActorHit = HitResult.GetActor();
+	//Если мы дотянимся до такого актора ударимся об него то добавляем физическую ручку
+	if (ActorHit)
+	{		
+		if (!PhysicsHandle) { return; }
+		PhysicsHandle->GrabComponentAtLocationWithRotation(ComponentToGrab, NAME_None, ComponentToGrab->GetOwner()->GetActorLocation(), FRotator(0,0,0));
+	}
+}
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	  
-	//Проверка куда смотрит персонаж 
 
+	
 	FVector PlayerViwePointLocation;//входные журналы
 	FRotator PlayerViwePointRotation;
 
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
 		OUT PlayerViwePointLocation,
-		OUT PlayerViwePointRotation);	
+		OUT PlayerViwePointRotation);
+
+	FVector LintraceEnd = PlayerViwePointLocation + (PlayerViwePointRotation.Vector() * Reach);
+
+	////Если физическая ручка преклеплина
+
+	
+	//То мы должны двигать компонент 
+	PhysicsHandle->SetTargetLocation(LintraceEnd);
+	
+}
+
+void UGrabber::Release()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Release"));
+	PhysicsHandle->ReleaseComponent();
+}
+
+const FHitResult UGrabber::GetFirstPhysicsBodyInReach()
+{
+	FVector PlayerViwePointLocation;//входные журналы
+	FRotator PlayerViwePointRotation;
+
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+		OUT PlayerViwePointLocation,
+		OUT PlayerViwePointRotation);
 
 	FVector LintraceEnd = PlayerViwePointLocation + PlayerViwePointRotation.Vector() * Reach;
 
-	/*UE_LOG(LogTemp, Warning, TEXT("location: %s, rotation: %s"), 
-		*PlayerViwePointLocation.ToString(), 
-		*PlayerViwePointRotation.ToString());*/
-
-	DrawDebugLine
-	(
-		GetWorld(),
-		PlayerViwePointLocation,
-		LintraceEnd,
-		FColor(255, 0, 0),
-		false,
-		0.f,
-		0.f,
-		5.f
-	);
-	
 	FCollisionQueryParams TraceParametrs(FName(TEXT("")), false, GetOwner());
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByObjectType
@@ -97,13 +123,10 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	);
 
 	AActor* ActorHit = Hit.GetActor(); // указывает об какой объект произошо сталкновение 
-		if (ActorHit)
+	if (ActorHit)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Actor hit : %s "), *(ActorHit->GetName()));
 	}
 
-		
-		 
-	
+	return Hit;
 }
-

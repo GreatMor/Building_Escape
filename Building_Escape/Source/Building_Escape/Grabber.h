@@ -24,17 +24,27 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	float Reach = 50.f;
 
-	UPhysicsHandleComponent * PhysicsHandel = nullptr;
+	float Reach = 100.f;
+
+	UPhysicsHandleComponent * PhysicsHandle = nullptr;
+
 	UInputComponent *InputComponent = nullptr;
 
 	///Посылает луч и хватает то до чего достал 
 	void Grab();
 
+	void Release();
+	//Находит физичискую ручку	
+	void FindPhysicsHandleComponent();
+	
+	//Устанавливает вводный компонент 
+	void SetupInputComponent();
+
+	//Возвращает удар или прикосновение для первого физ тела в досягаймости
+	const FHitResult GetFirstPhysicsBodyInReach();
+
 public:	
 	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;		
 };
