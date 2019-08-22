@@ -24,6 +24,9 @@ protected:
 	void OpenDoor();
 
 	void CloseDoor();
+
+//вернёт обшую массу акторов на пластине 
+	float GetTotalMassOfActorsOnPlate();
 	
 
 public:	
@@ -40,7 +43,7 @@ private:
 	ATriggerVolume * PressurePlate;
 
 	//UPROPERTY(EditAnywhere)
-	AActor * ActorThatOpens; //эктор который открывает 
+
 
 	AActor * Owner;// этор обладающий дверью
 

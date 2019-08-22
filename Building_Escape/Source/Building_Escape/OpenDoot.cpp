@@ -6,6 +6,8 @@
 #include "Math/TransformNonVectorized.h"
 #include "Engine/World.h"
 
+#define OUT
+
 // Sets default values for this component's properties
 UOpenDoot::UOpenDoot()
 {
@@ -22,7 +24,7 @@ void UOpenDoot::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
+	
 	Owner = GetOwner();
 }
 
@@ -30,7 +32,7 @@ void UOpenDoot::BeginPlay()
 void UOpenDoot::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (PressurePlate->IsOverlappingActor(ActorThatOpens))
+	if (GetTotalMassOfActorsOnPlate()>50.f)
 	{
 		OpenDoor();
 		LastDoorOpenTiame = GetWorld()->GetTimeSeconds();
@@ -50,6 +52,23 @@ void UOpenDoot::CloseDoor()
 {
 	//Set the door rotation
 	Owner->SetActorRotation(FRotator(0.0f, 90.f, 0.0f));
+}
+
+float UOpenDoot::GetTotalMassOfActorsOnPlate()
+{
+	float TotalMass = 0;
+
+	//перечисление всех акторов которые пересикаются с платформой 
+	TArray<AActor*>OwerlappingActors;
+
+	PressurePlate->GetOverlappingActors(OUT OwerlappingActors);
+	
+	for (const auto& Actor : OwerlappingActors)
+	{
+		TotalMass+= Actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+		UE_LOG(LogTemp, Warning, TEXT("%s On pressed paket "), *Actor->GetName());
+	}
+	return TotalMass;
 }
 
 

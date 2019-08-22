@@ -54,7 +54,7 @@ void UGrabber::FindPhysicsHandleComponent()
 }
 
 void UGrabber::Grab()
-{
+{	
 	//¬ыпускаем луч и провер€ем дот€нулись до актора с установленым параметром фзического тела 	
 	auto HitResult = GetFirstPhysicsBodyInReach();
 	//ѕолучает компонете до которого дотронулс€ актор
@@ -62,15 +62,20 @@ void UGrabber::Grab()
 
 	auto ActorHit = HitResult.GetActor();
 	//≈сли мы дот€нимс€ до такого актора ударимс€ об него то добавл€ем физическую ручку
+	
+	
 	if (ActorHit)
 	{		
 		if (!PhysicsHandle) { return; }
-		PhysicsHandle->GrabComponentAtLocationWithRotation(ComponentToGrab, 
-			NAME_None, //кости не нужны
-			ComponentToGrab->GetOwner()->GetActorLocation(), 
-			FRotator(0,0,0));
+		
+			PhysicsHandle->GrabComponentAtLocationWithRotation(ComponentToGrab,
+				NAME_None, //кости не нужны
+				ComponentToGrab->GetOwner()->GetActorLocation(),
+				FRotator(0, 0, 0));
+		
 	}
 }
+
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);		
