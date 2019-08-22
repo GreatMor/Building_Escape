@@ -50,15 +50,11 @@ void UGrabber::FindPhysicsHandleComponent()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("FindPhysicsComponent = true"));
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s no component "), *GetOwner()->GetName());
-	}
+
 }
 
 void UGrabber::Grab()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Grab"));	
 	//Выпускаем луч и проверяем дотянулись до актора с установленым параметром фзического тела 	
 	auto HitResult = GetFirstPhysicsBodyInReach();
 	//Получает компонете до которого дотронулся актор
@@ -69,38 +65,51 @@ void UGrabber::Grab()
 	if (ActorHit)
 	{		
 		if (!PhysicsHandle) { return; }
-		PhysicsHandle->GrabComponentAtLocationWithRotation(ComponentToGrab, NAME_None, ComponentToGrab->GetOwner()->GetActorLocation(), FRotator(0,0,0));
+		PhysicsHandle->GrabComponentAtLocationWithRotation(ComponentToGrab, 
+			NAME_None, //кости не нужны
+			ComponentToGrab->GetOwner()->GetActorLocation(), 
+			FRotator(0,0,0));
 	}
 }
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);		
 	
-	FVector PlayerViwePointLocation;//входные журналы
-	FRotator PlayerViwePointRotation;
-
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViwePointLocation,
-		OUT PlayerViwePointRotation);
-
-	FVector LintraceEnd = PlayerViwePointLocation + (PlayerViwePointRotation.Vector() * Reach);
-
+	GetReachLineEnd();
 	////Если физическая ручка преклеплина
-
-	
 	//То мы должны двигать компонент 
-	PhysicsHandle->SetTargetLocation(LintraceEnd);
+	PhysicsHandle->SetTargetLocation(GetReachLineEnd());
 	
 }
 
 void UGrabber::Release()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Release"));
 	PhysicsHandle->ReleaseComponent();
 }
 
 const FHitResult UGrabber::GetFirstPhysicsBodyInReach()
+{
+	FCollisionQueryParams TraceParametrs(FName(TEXT("")), false, GetOwner());
+	FHitResult HitResult;
+	GetWorld()->LineTraceSingleByObjectType
+	(
+		OUT HitResult,
+		GetReachLineStart(),
+		GetReachLineEnd(),
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
+		TraceParametrs
+	);
+
+	AActor* ActorHit = HitResult.GetActor(); // указывает об какой объект произошо сталкновение 
+	if (ActorHit)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Actor hit : %s "), *(ActorHit->GetName()));
+	}
+
+	return HitResult;
+} 
+
+FVector UGrabber::GetReachLineStart()
 {
 	FVector PlayerViwePointLocation;//входные журналы
 	FRotator PlayerViwePointRotation;
@@ -108,25 +117,18 @@ const FHitResult UGrabber::GetFirstPhysicsBodyInReach()
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
 		OUT PlayerViwePointLocation,
 		OUT PlayerViwePointRotation);
+	
+	return PlayerViwePointLocation;
+}
 
-	FVector LintraceEnd = PlayerViwePointLocation + PlayerViwePointRotation.Vector() * Reach;
+FVector UGrabber::GetReachLineEnd()
+{
+	FVector PlayerViwePointLocation;//входные журналы
+	FRotator PlayerViwePointRotation;
 
-	FCollisionQueryParams TraceParametrs(FName(TEXT("")), false, GetOwner());
-	FHitResult Hit;
-	GetWorld()->LineTraceSingleByObjectType
-	(
-		OUT Hit,
-		PlayerViwePointLocation,
-		LintraceEnd,
-		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
-		TraceParametrs
-	);
-
-	AActor* ActorHit = Hit.GetActor(); // указывает об какой объект произошо сталкновение 
-	if (ActorHit)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Actor hit : %s "), *(ActorHit->GetName()));
-	}
-
-	return Hit;
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+		OUT PlayerViwePointLocation,
+		OUT PlayerViwePointRotation);
+	FVector LintraceEnd = PlayerViwePointLocation + (PlayerViwePointRotation.Vector() * Reach);
+	return LintraceEnd;
 }

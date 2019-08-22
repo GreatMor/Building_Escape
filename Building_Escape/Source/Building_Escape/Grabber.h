@@ -44,6 +44,9 @@ private:
 	//Возвращает удар или прикосновение для первого физ тела в досягаймости
 	const FHitResult GetFirstPhysicsBodyInReach();
 
+	FVector GetReachLineStart();//Возвращает текущий начало линии досягаймости
+	FVector GetReachLineEnd();//Возвращает текущий конец линии досягаймости
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;		
